@@ -27,6 +27,8 @@ public class UsacucarApplication implements CommandLineRunner {
 	@Autowired
 	private ProcessadorRegistroStrategyRegra processador;
 
+
+
 	public static void main(String[] args) {
 		SpringApplication.run(UsacucarApplication.class, args);
 	}

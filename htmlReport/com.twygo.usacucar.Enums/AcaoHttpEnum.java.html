@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AcaoHttpEnum.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Run Coverage Results</a> &gt; <a href="index.source.html" class="el_package">com.twygo.usacucar.Enums</a> &gt; <span class="el_source">AcaoHttpEnum.java</span></div><h1>AcaoHttpEnum.java</h1><pre class="source lang-java linenums">package com.twygo.usacucar.Enums;
+
+
+<span class="nc" id="L4">public enum AcaoHttpEnum {</span>
+<span class="nc" id="L5">    SUCCESS(NovoStatusEnvioEnum.FINALIZADO),</span>
+<span class="nc" id="L6">    CLIENT_ERROR(NovoStatusEnvioEnum.ERRO),</span>
+<span class="nc" id="L7">    SERVER_ERROR(NovoStatusEnvioEnum.ERRO),</span>
+<span class="nc" id="L8">    UNKNOWN_ERROR(NovoStatusEnvioEnum.ERRO);</span>
+
+    private final NovoStatusEnvioEnum status;
+
+<span class="nc" id="L12">    AcaoHttpEnum(NovoStatusEnvioEnum status) {</span>
+<span class="nc" id="L13">        this.status = status;</span>
+<span class="nc" id="L14">    }</span>
+
+    public NovoStatusEnvioEnum getStatus() {
+<span class="nc" id="L17">        return status;</span>
+    }
+
+    public static AcaoHttpEnum fromStatusCode(int statusCode) {
+<span class="nc bnc" id="L21" title="All 4 branches missed.">        return switch (statusCode / 100) {</span>
+<span class="nc" id="L22">            case 2 -&gt; SUCCESS;</span>
+<span class="nc" id="L23">            case 4 -&gt; CLIENT_ERROR;</span>
+<span class="nc" id="L24">            case 5 -&gt; SERVER_ERROR;</span>
+<span class="nc" id="L25">            default -&gt; UNKNOWN_ERROR;</span>
+        };
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

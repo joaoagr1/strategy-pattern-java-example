@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TokenServiceTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Run Coverage Results</a> &gt; <a href="index.source.html" class="el_package">com.twygo.usacucar.Regra</a> &gt; <span class="el_source">TokenServiceTest.java</span></div><h1>TokenServiceTest.java</h1><pre class="source lang-java linenums">package com.twygo.usacucar.Regra;
+
+import com.twygo.usacucar.Entidades.Acesso;
+import com.twygo.usacucar.Regra.TokenRegra;
+import com.twygo.usacucar.Repositorios.AcessoRepository;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
+
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.util.Collections;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@ActiveProfiles(&quot;desenv&quot;)
+@ExtendWith(MockitoExtension.class)
+<span class="nc" id="L29">class TokenServiceTest {</span>
+
+    @Mock
+    private AcessoRepository acessoRepositoryMock;
+
+    @InjectMocks
+    private TokenRegra tokenRegra;
+
+    @Mock
+    private HttpURLConnection connection;
+
+    @Mock
+    private Acesso mockAcesso;
+
+    @BeforeEach
+    void requisicaoSimulada() throws IOException {
+<span class="nc" id="L45">        mockAcesso = new Acesso();</span>
+<span class="nc" id="L46">        mockAcesso.setId(1L);</span>
+<span class="nc" id="L47">        mockAcesso.setUsernameTwygo(&quot;teste&quot;);</span>
+<span class="nc" id="L48">        mockAcesso.setPasswordTwygo(&quot;senha&quot;);</span>
+<span class="nc" id="L49">        mockAcesso.setUrl(&quot;http://teste.com.br&quot;);</span>
+<span class="nc" id="L50">        when(acessoRepositoryMock.findAll()).thenReturn(Collections.singletonList(mockAcesso));</span>
+<span class="nc" id="L51">    }</span>
+
+    @Test
+    @DisplayName(&quot;verificando se está pegando o acesso&quot;)
+    void findAcessos() {
+<span class="nc" id="L56">        List&lt;Acesso&gt; acesso = acessoRepositoryMock.findAll();</span>
+<span class="nc" id="L57">        assertThat(acesso).isNotEmpty();</span>
+<span class="nc" id="L58">    }</span>
+
+    @Test
+    @DisplayName(&quot;verificando se acesso = null&quot;)
+    void findAcessosNull() {
+<span class="nc" id="L63">        when(acessoRepositoryMock.findAll()).thenReturn(Collections.emptyList());</span>
+<span class="nc" id="L64">        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -&gt; tokenRegra.refreshAccessToken());</span>
+<span class="nc" id="L65">        String erro = exception.getMessage();</span>
+<span class="nc" id="L66">        assertEquals(&quot;No Acesso details found in the database&quot;, erro);</span>
+<span class="nc" id="L67">    }</span>
+
+    @Test
+    @DisplayName(&quot;verificando se está gerando token com sucesso&quot;)
+    void geraTokenComSucesso() throws IOException {
+<span class="nc" id="L72">        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();</span>
+<span class="nc" id="L73">        when(connection.getOutputStream()).thenReturn(new DataOutputStream(outputStream));</span>
+<span class="nc" id="L74">        when(connection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);</span>
+<span class="nc" id="L75">        ByteArrayInputStream body = new ByteArrayInputStream(&quot;{\&quot;access_token\&quot;: \&quot;1234\&quot;,\&quot;token_type\&quot;: \&quot;Bearer\&quot;}&quot;.getBytes());</span>
+<span class="nc" id="L76">        when(connection.getInputStream()).thenReturn(body);</span>
+<span class="nc" id="L77">        TokenRegra spyTokenService = spy(tokenRegra);</span>
+<span class="nc" id="L78">        doReturn(connection).when(spyTokenService).createConnection(anyString());</span>
+<span class="nc" id="L79">        tokenRegra = spyTokenService;</span>
+<span class="nc" id="L80">        String token = tokenRegra.getAccessToken();</span>
+<span class="nc" id="L81">        assertThat(token).isNotEmpty();</span>
+<span class="nc" id="L82">        assertThat(token).isEqualTo(&quot;1234&quot;);</span>
+        // Verifica se o token foi atualizado
+<span class="nc" id="L84">        verify(spyTokenService).refreshAccessToken();</span>
+<span class="nc" id="L85">    }</span>
+
+    @Test
+    @DisplayName(&quot;verificando quando não vem o token&quot;)
+    void geraTokenErro() throws IOException {
+<span class="nc" id="L90">        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();</span>
+<span class="nc" id="L91">        when(connection.getOutputStream()).thenReturn(new DataOutputStream(outputStream));</span>
+<span class="nc" id="L92">        when(connection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);</span>
+        // Simula resposta vazia
+<span class="nc" id="L94">        ByteArrayInputStream body = new ByteArrayInputStream(&quot;&quot;.getBytes());</span>
+<span class="nc" id="L95">        when(connection.getInputStream()).thenReturn(body);</span>
+<span class="nc" id="L96">        TokenRegra spyTokenService = spy(tokenRegra);</span>
+<span class="nc" id="L97">        doReturn(connection).when(spyTokenService).createConnection(anyString());</span>
+<span class="nc" id="L98">        tokenRegra = spyTokenService;</span>
+        // Verifica se uma exceção é lançada quando não há token na resposta
+<span class="nc" id="L100">        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, tokenRegra::getAccessToken);</span>
+<span class="nc" id="L101">        String erro = exception.getMessage();</span>
+<span class="nc" id="L102">        assertEquals(&quot;Erro em criar o token&quot;, erro);</span>
+        // Verifica se o token não foi atualizado
+<span class="nc" id="L104">        verify(spyTokenService, atLeastOnce()).refreshAccessToken();</span>
+<span class="nc" id="L105">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

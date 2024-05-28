@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MostrarStatusCursoStrategyInterface.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Run Coverage Results</a> &gt; <a href="index.source.html" class="el_package">com.twygo.usacucar.Estrategias</a> &gt; <span class="el_source">MostrarStatusCursoStrategyInterface.java</span></div><h1>MostrarStatusCursoStrategyInterface.java</h1><pre class="source lang-java linenums">package com.twygo.usacucar.Estrategias;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.twygo.usacucar.Entidades.FilaProcessamento;
+import com.twygo.usacucar.Enums.AcaoHttpEnum;
+import com.twygo.usacucar.Enums.NovoStatusEnvioEnum;
+import com.twygo.usacucar.Regra.FilaProcessamentoRegra;
+import com.twygo.usacucar.Regra.TokenRegra;
+import com.twygo.usacucar.Repositorios.FilaProcessamentoRepository;
+import com.twygo.usacucar.Interfaces.StrategyInterface;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.hc.core5.http.HttpException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Map;
+import java.util.TimeZone;
+
+@Service
+<span class="pc bpc" id="L31" title="41 of 46 branches missed.">@Data</span>
+<span class="fc" id="L32">@Slf4j</span>
+public class MostrarStatusCursoStrategyInterface implements StrategyInterface {
+
+    @Value(&quot;${baseUrl}&quot;)
+<span class="fc" id="L36">    private String baseUrl;</span>
+
+    @Autowired
+<span class="fc" id="L39">    private FilaProcessamentoRegra filaProcessamentoRegra;</span>
+
+    @Autowired
+<span class="fc" id="L42">    private TokenRegra tokenRegra;</span>
+
+    @Autowired
+<span class="fc" id="L45">    private HttpClient httpClient;</span>
+
+    @Autowired
+<span class="fc" id="L48">    private FilaProcessamentoRepository filaProcessamentoRepository;</span>
+
+    @Override
+    public void executarAcao(FilaProcessamento registro) throws HttpException, IOException, ParseException, InterruptedException {
+<span class="nc" id="L52">        mostrarStatusConclusaoCurso(registro);</span>
+<span class="nc" id="L53">    }</span>
+
+    private HttpResponse&lt;String&gt; sendRequestWithAuthorization(String accessToken, FilaProcessamento registro) throws IOException, HttpException, InterruptedException {
+<span class="nc" id="L56">        String url = baseUrl + &quot;students_events/&quot; + registro.getId_inscricao();</span>
+<span class="nc" id="L57">        HttpRequest request = HttpRequest.newBuilder()</span>
+<span class="nc" id="L58">                .uri(URI.create(url))</span>
+<span class="nc" id="L59">                .header(&quot;Authorization&quot;, &quot;Bearer &quot; + accessToken)</span>
+<span class="nc" id="L60">                .GET()</span>
+<span class="nc" id="L61">                .build();</span>
+
+<span class="nc" id="L63">        return httpClient.send(request, HttpResponse.BodyHandlers.ofString());</span>
+    }
+
+    @Override
+    public void mostrarStatusConclusaoCurso(FilaProcessamento registro) throws InterruptedException, ParseException, HttpException {
+      try {
+<span class="nc" id="L69">        String accessToken = tokenRegra.getAccessToken();</span>
+<span class="nc" id="L70">        HttpResponse&lt;String&gt; response = sendRequestWithAuthorization(accessToken, registro);</span>
+
+<span class="nc" id="L72">        ObjectMapper objectMapper = new ObjectMapper();</span>
+<span class="nc" id="L73">        Map&lt;String, Object&gt; jsonResponse = objectMapper.readValue(response.body(), new TypeReference&lt;&gt;() {});</span>
+<span class="nc" id="L74">        Map&lt;String, Object&gt; event = (Map&lt;String, Object&gt;) jsonResponse.get(&quot;event&quot;);</span>
+
+<span class="nc" id="L76">        String aprovado = (String) event.get(&quot;approved_at&quot;);</span>
+<span class="nc" id="L77">        Double progress_score = (Double) event.get(&quot;progress_score&quot;);</span>
+<span class="nc" id="L78">        String last_access_at = (String) event.get(&quot;last_access_at&quot;);</span>
+<span class="nc" id="L79">        String sq_fila = String.valueOf(registro.getSq_fila());</span>
+
+<span class="nc" id="L81">        SimpleDateFormat isoFormat = new SimpleDateFormat(&quot;yyyy-MM-dd'T'HH:mm:ss.SSS'Z'&quot;);</span>
+<span class="nc" id="L82">        isoFormat.setTimeZone(TimeZone.getTimeZone(&quot;America/Brasilia&quot;));</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        Date aprovadoDate = aprovado != null ? isoFormat.parse(aprovado) : null;</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        Date last_access_atDate = last_access_at != null ? isoFormat.parse(last_access_at) : null;</span>
+
+<span class="nc" id="L86">        filaProcessamentoRepository.atualizaStatus(last_access_atDate, progress_score, aprovadoDate, sq_fila);</span>
+
+<span class="nc" id="L88">        AcaoHttpEnum action = AcaoHttpEnum.fromStatusCode(response.statusCode());</span>
+
+<span class="nc" id="L90">          filaProcessamentoRegra.finalizaAcao(registro, response.body(), registro.toString(), action.getStatus());</span>
+<span class="nc" id="L91">      } catch (Exception e) {</span>
+<span class="nc" id="L92">          filaProcessamentoRegra.finalizaAcao(registro, e.getMessage(), String.valueOf(e.getCause()), NovoStatusEnvioEnum.ERRO);</span>
+<span class="nc" id="L93">              }</span>
+<span class="nc" id="L94">    }</span>
+
+
+
+    @Override
+    public void criarUsuario(FilaProcessamento registro) {
+<span class="nc" id="L100">        throw new UnsupportedOperationException(&quot;Não implementado&quot;);</span>
+    }
+
+    @Override
+    public void inscreverUsuarioCurso(FilaProcessamento registro) {
+<span class="nc" id="L105">        throw new UnsupportedOperationException(&quot;Não implementado&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

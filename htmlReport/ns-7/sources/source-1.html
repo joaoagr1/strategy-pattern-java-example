@@ -1,0 +1,134 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > FilaProcessamentoRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.twygo.usacucar.Repositorios</a>
+</div>
+
+<h1>Coverage Summary for Class: FilaProcessamentoRepository (com.twygo.usacucar.Repositorios)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">FilaProcessamentoRepository$MockitoMock$aReja1ed</td>
+  </tr>
+  <tr>
+    <td class="name">FilaProcessamentoRepository$MockitoMock$aReja1ed$auxiliary$ciM2wKwk</td>
+  </tr>
+  <tr>
+    <td class="name">FilaProcessamentoRepository$MockitoMock$aReja1ed$auxiliary$qIdJ7KWj</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.twygo.usacucar.Repositorios;
+&nbsp;
+&nbsp;import com.twygo.usacucar.Entidades.FilaProcessamento;
+&nbsp;import jakarta.transaction.Transactional;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Modifying;
+&nbsp;import org.springframework.data.jpa.repository.Query;
+&nbsp;import org.springframework.data.repository.query.Param;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;@Repository
+&nbsp;public interface FilaProcessamentoRepository extends JpaRepository&lt;FilaProcessamento,String&gt; {
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    @Modifying
+&nbsp;    @Query(value = &quot;UPDATE fila_processamento SET JSON_ENVIO = :json WHERE SQ_FILA = :sqFila&quot;, nativeQuery = true)
+&nbsp;    int atualizaJsonEnvio(@Param(&quot;sqFila&quot;) String sqFila, @Param(&quot;json&quot;) String json);
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    @Modifying
+&nbsp;    @Query(value = &quot;UPDATE fila_processamento SET JSON_RETORNO = :json WHERE SQ_FILA = :sqFila&quot;, nativeQuery = true)
+&nbsp;    int atualizaJsonRetorno(@Param(&quot;sqFila&quot;) String sqFila, @Param(&quot;json&quot;) String json);
+&nbsp;
+&nbsp;
+&nbsp;    @Modifying
+&nbsp;    @Transactional
+&nbsp;    @Query(value =&quot;UPDATE fila_processamento SET STATUS_ENVIO = :novoStatus WHERE SQ_FILA = :sqFila&quot;, nativeQuery = true)
+&nbsp;    int atualizaStatus(@Param(&quot;sqFila&quot;) String sqFila, @Param(&quot;novoStatus&quot;) String novoStatus);
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    @Modifying
+&nbsp;    @Query(value = &quot;UPDATE fila_processamento SET id_usuario = :id_usuario, status_envio = &#39;F&#39; WHERE sq_fila = :sq_fila AND tp_acao = 1 &quot;, nativeQuery = true)
+&nbsp;    int atualizaIdUsuario(@Param(&quot;id_usuario&quot;) String id_usuario,
+&nbsp;                           @Param(&quot;sq_fila&quot;) String sq_fila);
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    @Modifying
+&nbsp;    @Query(value = &quot;UPDATE fila_processamento SET id_inscricao = :id_inscricao WHERE  sq_fila = :sq_fila&quot;, nativeQuery = true)
+&nbsp;    int atualizaIdInscricao(@Param(&quot;id_inscricao&quot;) String id_inscricao,
+&nbsp;                             @Param(&quot;sq_fila&quot;) String sq_fila);
+&nbsp;
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    @Modifying
+&nbsp;    @Query(value = &quot;UPDATE fila_processamento SET LAST_ACCESS_AT = :ultimoAcesso, PROGRESS_SCORE = :progresso, APPROVED_AT = :dataAprovacao, STATUS_ENVIO = &#39;F&#39; WHERE sq_fila = :sq_fila&quot;, nativeQuery = true)
+&nbsp;    int atualizaStatus(@Param(&quot;ultimoAcesso&quot;) Date ultimoAcesso,
+&nbsp;                        @Param(&quot;progresso&quot;) Double progresso,
+&nbsp;                        @Param(&quot;dataAprovacao&quot;) Date dataAprovacao,
+&nbsp;                        @Param(&quot;sq_fila&quot;) String sqFila);
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-05-24 14:57</div>
+</div>
+</body>
+</html>

@@ -2,8 +2,8 @@ package com.twygo.usacucar.Regra;
 
 import com.twygo.usacucar.Entidades.FilaProcessamento;
 
-import com.twygo.usacucar.Interfaces.Strategy;
-import com.twygo.usacucar.Interfaces.StrategyFactory;
+import com.twygo.usacucar.Interfaces.StrategyInterface;
+import com.twygo.usacucar.Interfaces.StrategyFactoryInterface;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,11 +14,11 @@ import org.springframework.stereotype.Component;
 public class ProcessadorRegistroStrategyRegra {
 
     @Autowired
-    private StrategyFactory strategyFactory;
+    private StrategyFactoryInterface strategyFactoryInterface;
 
     @SneakyThrows
     public void processarRegistro(FilaProcessamento registro) {
-        Strategy strategy = strategyFactory.createStrategy(registro.getTp_acao());
-        strategy.executarAcao(registro);
+        StrategyInterface strategyInterface = strategyFactoryInterface.createStrategy(registro.getTp_acao());
+        strategyInterface.executarAcao(registro);
     }
 }

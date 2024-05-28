@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TokenRegra.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Run Coverage Results</a> &gt; <a href="index.source.html" class="el_package">com.twygo.usacucar.Regra</a> &gt; <span class="el_source">TokenRegra.java</span></div><h1>TokenRegra.java</h1><pre class="source lang-java linenums">package com.twygo.usacucar.Regra;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.gson.Gson;
+import com.twygo.usacucar.Repositorios.AcessoRepository;
+import com.twygo.usacucar.Entidades.Acesso;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Service
+<span class="fc" id="L22">public class TokenRegra {</span>
+
+<span class="nc" id="L24">    @Setter</span>
+    private String token;
+
+//    @Getter
+//    @Setter
+//    private long expiresIn;
+
+    @Autowired
+    private AcessoRepository acessoRepository;
+
+    @Transactional // fazer retornar o token.
+    public void refreshAccessToken() throws IOException {
+<span class="nc" id="L36">        Acesso acesso = findAcessoDetails();</span>
+
+
+<span class="nc" id="L39">        HttpURLConnection connection = createConnection(acesso.getUrl());</span>
+<span class="nc" id="L40">        sendRequest(connection, acesso.getUsernameTwygo(), acesso.getPasswordTwygo());</span>
+<span class="nc" id="L41">        handleResponse(connection);</span>
+<span class="nc" id="L42">        connection.disconnect();</span>
+<span class="nc" id="L43">    }</span>
+
+    private Acesso findAcessoDetails() {
+<span class="nc" id="L46">        List&lt;Acesso&gt; acessos = acessoRepository.findAll();</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">        if (acessos.isEmpty()) {</span>
+<span class="nc" id="L48">            throw new RuntimeException(&quot;No Acesso details found in the database&quot;);</span>
+        }
+<span class="nc" id="L50">        return acessos.get(0);</span>
+    }
+
+    HttpURLConnection createConnection(String url) throws IOException {
+<span class="nc" id="L54">        URL urlObj = new URL(url);</span>
+<span class="nc" id="L55">        HttpURLConnection connection = (HttpURLConnection) urlObj.openConnection();</span>
+<span class="nc" id="L56">        connection.setRequestMethod(&quot;POST&quot;);</span>
+<span class="nc" id="L57">        connection.setRequestProperty(&quot;Content-Type&quot;, &quot;application/json&quot;);</span>
+<span class="nc" id="L58">        connection.setDoOutput(true);</span>
+<span class="nc" id="L59">        return connection;</span>
+    }
+
+    private void sendRequest(HttpURLConnection connection, String username, String password) throws IOException {
+<span class="nc" id="L63">        Map&lt;String, String&gt; requestBodyMap = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L64">        requestBodyMap.put(&quot;grant_type&quot;, &quot;password&quot;);</span>
+<span class="nc" id="L65">        requestBodyMap.put(&quot;username&quot;, username);</span>
+<span class="nc" id="L66">        requestBodyMap.put(&quot;password&quot;, password);</span>
+
+<span class="nc" id="L68">        Gson gson = new Gson();</span>
+<span class="nc" id="L69">        String requestBody = gson.toJson(requestBodyMap);</span>
+<span class="nc" id="L70">        try (DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream())) {</span>
+<span class="nc" id="L71">            outputStream.writeBytes(requestBody);</span>
+<span class="nc" id="L72">            outputStream.flush();</span>
+        }
+<span class="nc" id="L74">    }</span>
+
+    private void handleResponse(HttpURLConnection connection) throws IOException {
+<span class="nc" id="L77">        int responseCode = connection.getResponseCode();</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        if (responseCode != HttpURLConnection.HTTP_OK) {</span>
+<span class="nc" id="L79">            throw new IOException(&quot;Failed to refresh token, HTTP response code: &quot; + responseCode);</span>
+        }
+
+<span class="nc" id="L82">        StringBuilder response = new StringBuilder();</span>
+<span class="nc" id="L83">        try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {</span>
+            String inputLine;
+<span class="nc bnc" id="L85" title="All 2 branches missed.">            while ((inputLine = reader.readLine()) != null) {</span>
+<span class="nc" id="L86">                response.append(inputLine);</span>
+            }
+        }
+
+<span class="nc" id="L90">        Gson gson = new Gson();</span>
+<span class="nc" id="L91">        Map&lt;String, Object&gt; responseMap = gson.fromJson(response.toString(), new TypeReference&lt;Map&lt;String, Object&gt;&gt;() {}.getType());</span>
+
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        if (responseMap != null) {</span>
+<span class="nc" id="L94">            token = (String) responseMap.get(&quot;access_token&quot;);</span>
+        } else {
+<span class="nc" id="L96">            throw new IOException(&quot;Invalid response from token endpoint&quot;);</span>
+        }
+<span class="nc" id="L98">    }</span>
+
+
+    public String getAccessToken() {
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        if (token == null) {</span>
+            try {
+<span class="nc" id="L104">                refreshAccessToken();</span>
+<span class="nc" id="L105">            } catch (IOException e) {</span>
+<span class="nc" id="L106">               throw new RuntimeException(&quot;Erro em criar o token&quot;);</span>
+                //throw new RuntimeException(e);
+<span class="nc" id="L108">            }</span>
+        }
+<span class="nc" id="L110">        return token;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

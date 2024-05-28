@@ -8,7 +8,7 @@ import lombok.*;
 
 @Table(name = "rhparame")
 @Entity(name = "rhparame")
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode(of = "PASSWORD_TWYGO")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -16,7 +16,8 @@ import lombok.*;
 public class Acesso  {
 
     @Id
-    private Long id;
+    @Column(insertable=false, updatable=false)
+    private Long PASSWORD_TWYGO;
 
     @Column(name = "password_twygo")
     private String passwordTwygo;

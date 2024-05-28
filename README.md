@@ -1,1 +1,3 @@
-# strategy-pattern-java-example
+# Twygo
+
+Integração com a plataforma da Twygo.

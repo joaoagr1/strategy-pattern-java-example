@@ -1,0 +1,157 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ProcessadorRegistroStrategyRegra</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.twygo.usacucar.Regra</a>
+</div>
+
+<h1>Coverage Summary for Class: ProcessadorRegistroStrategyRegra (com.twygo.usacucar.Regra)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProcessadorRegistroStrategyRegra</td>
+<td class="coverageStat">
+  <span class="percent">
+<<<<<<< HEAD
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+=======
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+>>>>>>> teste-repository
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+<<<<<<< HEAD
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+=======
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+>>>>>>> teste-repository
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+<<<<<<< HEAD
+    0%
+  </span>
+  <span class="absValue">
+    (0/4)
+=======
+    25%
+  </span>
+  <span class="absValue">
+    (1/4)
+>>>>>>> teste-repository
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.twygo.usacucar.Regra;
+&nbsp;
+&nbsp;import com.twygo.usacucar.Entidades.FilaProcessamento;
+&nbsp;
+&nbsp;import com.twygo.usacucar.Interfaces.StrategyInterface;
+&nbsp;import com.twygo.usacucar.Interfaces.StrategyFactoryInterface;
+&nbsp;import lombok.SneakyThrows;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;@Component
+<<<<<<< HEAD
+<b class="nc">&nbsp;public class ProcessadorRegistroStrategyRegra {</b>
+=======
+<b class="fc">&nbsp;public class ProcessadorRegistroStrategyRegra {</b>
+>>>>>>> teste-repository
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    private StrategyFactoryInterface strategyFactoryInterface;
+&nbsp;
+<b class="nc">&nbsp;    @SneakyThrows</b>
+&nbsp;    public void processarRegistro(FilaProcessamento registro) {
+<b class="nc">&nbsp;        StrategyInterface strategyInterface = strategyFactoryInterface.createStrategy(registro.getTp_acao());</b>
+<b class="nc">&nbsp;        strategyInterface.executarAcao(registro);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+<<<<<<< HEAD
+    <div style="float:right;">generated on 2024-05-24 12:00</div>
+=======
+    <div style="float:right;">generated on 2024-05-24 10:36</div>
+>>>>>>> teste-repository
+</div>
+</body>
+</html>

@@ -6,6 +6,7 @@ import com.twygo.usacucar.Repositorios.AcessoRepository;
 import com.twygo.usacucar.Entidades.Acesso;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,19 +24,17 @@ public class TokenRegra {
     @Setter
     private String token;
 
-    @Getter
-    @Setter
-    private long expiresIn;
+//    @Getter
+//    @Setter
+//    private long expiresIn;
 
     @Autowired
     private AcessoRepository acessoRepository;
 
-    @Transactional
+    @Transactional // fazer retornar o token.
     public void refreshAccessToken() throws IOException {
         Acesso acesso = findAcessoDetails();
-        if (acesso == null) {
-            throw new RuntimeException("Acesso details not found in the database");
-        }
+
 
         HttpURLConnection connection = createConnection("https://usacucar.twygoead.com/oauth/token");
         sendRequest(connection, acesso.getUsernameTwygo(), acesso.getPasswordTwygo());
@@ -51,7 +50,7 @@ public class TokenRegra {
         return acessos.get(0);
     }
 
-    private HttpURLConnection createConnection(String url) throws IOException {
+    HttpURLConnection createConnection(String url) throws IOException {
         URL urlObj = new URL(url);
         HttpURLConnection connection = (HttpURLConnection) urlObj.openConnection();
         connection.setRequestMethod("POST");
@@ -68,7 +67,6 @@ public class TokenRegra {
 
         Gson gson = new Gson();
         String requestBody = gson.toJson(requestBodyMap);
-
         try (DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream())) {
             outputStream.writeBytes(requestBody);
             outputStream.flush();
@@ -94,15 +92,20 @@ public class TokenRegra {
 
         if (responseMap != null) {
             token = (String) responseMap.get("access_token");
-           // expiresIn = ((Number) responseMap.get("expires_in")).longValue();
         } else {
             throw new IOException("Invalid response from token endpoint");
         }
     }
 
-    public String getAccessToken() throws IOException {
-        if (token == null || expiresIn <= 0) {
-            refreshAccessToken();
+
+    public String getAccessToken() {
+        if (token == null) {
+            try {
+                refreshAccessToken();
+            } catch (IOException e) {
+               throw new RuntimeException("Erro em criar o token");
+                //throw new RuntimeException(e);
+            }
         }
         return token;
     }

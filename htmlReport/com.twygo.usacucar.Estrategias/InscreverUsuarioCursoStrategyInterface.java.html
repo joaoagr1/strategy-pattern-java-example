@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InscreverUsuarioCursoStrategyInterface.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Run Coverage Results</a> &gt; <a href="index.source.html" class="el_package">com.twygo.usacucar.Estrategias</a> &gt; <span class="el_source">InscreverUsuarioCursoStrategyInterface.java</span></div><h1>InscreverUsuarioCursoStrategyInterface.java</h1><pre class="source lang-java linenums">package com.twygo.usacucar.Estrategias;
+
+import com.google.gson.Gson;
+import com.twygo.usacucar.Entidades.FilaProcessamento;
+import com.twygo.usacucar.Enums.AcaoHttpEnum;
+import com.twygo.usacucar.Enums.NovoStatusEnvioEnum;
+import com.twygo.usacucar.Regra.FilaProcessamentoRegra;
+import com.twygo.usacucar.Interfaces.StrategyInterface;
+import com.twygo.usacucar.Regra.TokenRegra;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.hc.core5.http.HttpException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.HashMap;
+import java.util.Map;
+
+@Service
+<span class="pc bpc" id="L26" title="34 of 38 branches missed.">@Data</span>
+<span class="fc" id="L27">@Slf4j</span>
+public class InscreverUsuarioCursoStrategyInterface implements StrategyInterface {
+
+    @Value(&quot;${baseUrl}&quot;)
+<span class="fc" id="L31">    private String baseUrl;</span>
+
+    @Autowired
+<span class="fc" id="L34">    private FilaProcessamentoRegra filaProcessamentoRegra;</span>
+
+    @Autowired
+<span class="fc" id="L37">    private TokenRegra tokenRegra;</span>
+
+    @Autowired
+<span class="fc" id="L40">    private HttpClient httpClient;</span>
+
+
+    @Override
+    public void executarAcao(FilaProcessamento registro) {
+<span class="nc" id="L45">        inscreverUsuarioCurso(registro);</span>
+<span class="nc" id="L46">    }</span>
+
+    private String createInscricaoRequestBody(FilaProcessamento registro) {
+<span class="nc" id="L49">        Map&lt;String, String&gt; requestBodyMap = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L50">        requestBodyMap.put(&quot;event_id&quot;, registro.getId_curso());</span>
+<span class="nc" id="L51">        requestBodyMap.put(&quot;student_id&quot;, registro.getId_usuario());</span>
+
+<span class="nc" id="L53">        return new Gson().toJson(requestBodyMap);</span>
+    }
+
+    private HttpResponse&lt;String&gt; sendRequestWithAuthorization(String accessToken, String requestBody) throws IOException, HttpException, InterruptedException {
+<span class="nc" id="L57">        HttpRequest request = HttpRequest.newBuilder()</span>
+<span class="nc" id="L58">                .uri(URI.create(baseUrl + &quot;/students_events&quot;))</span>
+<span class="nc" id="L59">                .header(&quot;Authorization&quot;, &quot;Bearer &quot; + accessToken)</span>
+<span class="nc" id="L60">                .header(&quot;Content-Type&quot;, &quot;application/json&quot;)</span>
+<span class="nc" id="L61">                .POST(HttpRequest.BodyPublishers.ofString(requestBody))</span>
+<span class="nc" id="L62">                .build();</span>
+
+<span class="nc" id="L64">        return httpClient.send(request, HttpResponse.BodyHandlers.ofString());</span>
+    }
+
+    @Override
+    public void inscreverUsuarioCurso(FilaProcessamento registro) {
+        try {
+<span class="nc" id="L70">            String accessToken = tokenRegra.getAccessToken();</span>
+<span class="nc" id="L71">            String requestBody = createInscricaoRequestBody(registro);</span>
+<span class="nc" id="L72">            HttpResponse&lt;String&gt; response = sendRequestWithAuthorization(accessToken, requestBody);</span>
+
+<span class="nc" id="L74">            AcaoHttpEnum action = AcaoHttpEnum.fromStatusCode(response.statusCode());</span>
+<span class="nc" id="L75">            filaProcessamentoRegra.finalizaAcao(registro, response.body(), requestBody, action.getStatus());</span>
+
+<span class="nc" id="L77">        } catch (IOException | HttpException | InterruptedException e) {</span>
+<span class="nc" id="L78">            filaProcessamentoRegra.finalizaAcao(registro, e.getMessage(), String.valueOf(e.getCause()), NovoStatusEnvioEnum.ERRO);</span>
+<span class="nc" id="L79">        }</span>
+<span class="nc" id="L80">    }</span>
+
+    @Override
+    public void criarUsuario(FilaProcessamento registro) {
+<span class="nc" id="L84">        throw new UnsupportedOperationException(&quot;Não implementado&quot;);</span>
+    }
+
+    @Override
+    public void mostrarStatusConclusaoCurso(FilaProcessamento registro) {
+<span class="nc" id="L89">        throw new UnsupportedOperationException(&quot;Não implementado&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
